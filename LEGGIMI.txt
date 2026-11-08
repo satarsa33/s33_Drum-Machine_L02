@@ -1,0 +1,50 @@
+S33 - DRUM MACHINE - L02 · v1 (1.0.0)
+=====================================
+
+La nuova drum machine: dieci voci analogiche (sintetizzate, senza campioni), step con velocity,
+accento, ratchet, probabilità e micro-spostamento, 8 pattern con catena e fill.
+La L01 (v8) resta com'è nella sua cartella.
+
+LE VOCI
+  KICK, SNARE, CLAP, CL HAT (chiuso), OP HAT (aperto), LO TOM, HI TOM, RIM, COWBELL, CYMBAL.
+  - Clic sul nome di una voce: la senti e la regoli nel pannello VOICE in basso (o dalle linguette).
+  - KICK: l'editor dell'inviluppo di pitch e le manopole della L01.
+  - SNARE: corpo (Tune, Decay, Pitch Env) e cordiera (Snares, Tone, Decay) separati; modello 808, 909, Tight.
+  - L'hat chiuso taglia l'hat aperto (choke), come nelle macchine classiche: è la parentesi a sinistra.
+  - M / S: mute e solo. Le due barrette accanto: livello (sopra) e pan (sotto), trascinando a destra e sinistra.
+  - MIXER: un fader e un pan per voce, con la luce del livello. Doppio clic: valore iniziale.
+
+GLI STEP (strumenti STEP TOOL, tasti 1–5)
+  1 PAINT    clic o trascina: mette e toglie i colpi.
+  2 ACCENT   clic su uno step: morbido → normale → accento (l'altezza del colore, il punto bianco).
+  3 RATCHET  1, 2, 3 o 4 colpi nello stesso step (i puntini): rullini di hat e snare.
+  4 CHANCE   probabilità 100, 75, 50, 25% (il numero): il pattern respira.
+  5 NUDGE    in tempo, un po' in ritardo, un po' in anticipo (‹ ›).
+  ⌥-clic su uno step: accento acceso o spento, con qualunque strumento.
+  Metro (3/4 4/4 5/4 7/4), risoluzione (1/8 … 1/32) e SWING in alto a destra del pattern.
+
+PATTERN, CATENA, FILL
+  - A … H: 8 pattern. Mentre suona, il cambio aspetta la fine della battuta (la lettera lampeggia).
+    Il puntino sotto la lettera: il pattern ha dei colpi. Copy / Paste / Clear sul pattern corrente.
+  - CHAIN acceso: i pattern suonano nell'ordine della catena. ＋ aggiunge il pattern corrente,
+    clic su una lettera della catena per toglierla.
+  - FILL (o il tasto F) mentre suona: l'ultimo quarto della battuta successiva diventa una rullata
+    di snare e tom, poi un piatto sul primo battito.
+  - Preset di genere: riempiono il pattern corrente. Random: un pattern nuovo a caso.
+
+EXPORT
+  Battute 1/2/4/8 · WAV del pattern con gli effetti · MIDI (note General MIDI, con le velocity) ·
+  Stems: un WAV per ogni voce usata. WAV nel pannello di una voce: il singolo suono.
+
+DALLA L01
+  Alla prima apertura, se nello stesso browser c'è la L01, il suo pattern e i suoi suoni vengono
+  copiati nel pattern A (kick, snare, hat chiuso, clap). La L01 non viene toccata.
+
+NELLA MOTHER BOARD
+  Dalla v0.10 il modulo Drum Machine è la L02: stessi cavi (Clock, uscita audio, MIDI). Con il
+  Clock collegato parte e si ferma con il Play della board. Dalla presa MIDI escono tutte le dieci
+  voci (canale 10, note General MIDI) con la loro velocity. Il rettangolo del modulo mostra il pattern vero.
+
+INSTALLARE
+  Come le altre app S33: GitHub Pages, oppure  python3 -m http.server 8035  nella cartella e poi
+  http://localhost:8035 in Chrome → Installa. Per una versione nuova cambia VERSIONE in sw.js.
