@@ -1,6 +1,41 @@
-S33 - DRUM MACHINE - L02 · v1 (1.0.0)
-=====================================
+S33 - DRUM MACHINE - L02 · v1.3 (1.3.0)
+=======================================
 
+Novità della 1.3 · KIT 80s E RIVERBERO GATED
+  - KIT, in alto nel pannello VOICE: "80s" (di serie) o "L02" (i suoni di prima). Si cambia al volo,
+    anche mentre suona: pattern, mixer ed effetti restano gli stessi.
+  - Il kit 80s ha i suoni delle anteprime delle demo song: kick con lo sweep e la saturazione,
+    rullante a 190 Hz con la cordiera, clap a tre colpi, hi-hat brillanti, tom, campanaccio, piatto.
+    Sempre sintesi pura, senza campioni. Ogni voce ha le sue manopole (Tune, Decay, Tone, Punch,
+    Click, Drive, Snares, Spread…): i valori di partenza sono quelli dell'anteprima, doppio clic per tornarci.
+  - GATE, nel MASTER · FX: il riverbero "tagliato" degli anni '80 su rullante e clap. Si apre a ogni
+    colpo e si chiude di colpo dopo 260 ms. Vale per tutti e due i kit e anche nell'export.
+    0 = spento, 50 = come nell'anteprima.
+  - Le note MIDI e il sequencer suonano il kit scelto.
+
+Novità della 1.2 · BATTERIA A TEMPO
+  - La L02 suonava circa 9 ms dopo gli altri strumenti, e il colpo del kick arrivava "spalmato".
+    La causa era il compressore del MASTER (Comp): quello del browser ritarda tutto di 6 ms per
+    guardare avanti, e con l'attacco di 3 ms schiacciava proprio l'inizio del colpo.
+    Ora c'è un compressore fatto apposta, a ritardo zero: stessa manopola, stesso suono,
+    ma il colpo parte subito e con tutta la sua forza. Vale per il sequencer, per il MIDI e per l'export.
+  - I colpi che arrivano dal MIDI partono subito (prima avevano 3 ms in più).
+
+Novità della 1.1 · MIDI IN
+  La L02 ora si suona anche dal MIDI: da una tastiera, da Logic o, nella Mother Board, da un cavo.
+  - Le note General MIDI suonano le dieci voci:
+      36 (35) KICK · 38 (40) SNARE · 39 CLAP · 42 (44) CL HAT · 46 OP HAT
+      45 (41, 43) LO TOM · 50 (47, 48) HI TOM · 37 RIM · 56 COWBELL · 49 (51, 52, 55, 57, 59) CYMBAL
+    Sulla tastiera: il Do due ottave sotto il Do centrale (nota 36) è il kick, il Re lo snare, il Fa# l'hat chiuso.
+  - La velocity dà la forza del colpo. Mute e solo valgono anche per le note MIDI.
+    L'hat chiuso taglia l'aperto anche qui.
+  - MIDI · ALL / CH 1–16, in alto nel pannello MASTER · FX: il canale da ascoltare. La luce blu
+    accanto si accende a ogni nota che arriva. Da sola ascolta tutte le porte MIDI del Mac
+    (con Logic sul bus IAC conviene scegliere il canale della traccia di batteria).
+  - Le note MIDI suonano insieme al sequencer: puoi tenere un pattern e aggiungere colpi a mano.
+  - I colpi che arrivano dal MIDI non escono dalla presa MIDI (così non tornano indietro in anello).
+
+Dalla 1.0
 La nuova drum machine: dieci voci analogiche (sintetizzate, senza campioni), step con velocity,
 accento, ratchet, probabilità e micro-spostamento, 8 pattern con catena e fill.
 La L01 (v8) resta com'è nella sua cartella.

@@ -102,7 +102,7 @@ header{display:flex;align-items:center;gap:10px;height:60px}
 .bot{display:grid;grid-template-columns:1.8fr .9fr .95fr;gap:10px;height:292px}
 .bot .panel{display:flex;flex-direction:column;min-height:0}
 .tabs{display:flex;gap:2px;flex-wrap:nowrap;justify-content:flex-end}
-.tabs span{padding:5px 6px;border-radius:6px;font:800 9px/1 sans-serif;letter-spacing:.13em;background:#2a2927;color:var(--mut);cursor:pointer;border-left:3px solid var(--c)}
+.tabs span{white-space:nowrap;padding:5px 5px;border-radius:6px;font:800 9px/1 sans-serif;letter-spacing:.07em;background:#2a2927;color:var(--mut);cursor:pointer;border-left:3px solid var(--c)}
 .tabs span.on{background:var(--c);color:#141312}
 .voice{flex:1;border-radius:10px;padding:10px 12px;display:flex;gap:14px;min-height:0;background:var(--c);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -2px 0 rgba(0,0,0,.18)}
 .voice .sec{display:flex;flex-direction:column;gap:6px;min-width:0}
@@ -143,6 +143,9 @@ header{display:flex;align-items:center;gap:10px;height:60px}
 .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .foot{font-size:10px;color:var(--mut);display:flex;gap:10px;justify-content:center;height:12px;white-space:nowrap}
 #st{color:#9fdcb4}
+.mled{display:inline-block;width:9px;height:9px;border-radius:50%;background:#2a2824;box-shadow:inset 0 0 0 1px #000;transition:background .3s,box-shadow .3s}
+.mled.on{background:#5aa0ff;box-shadow:0 0 7px #5aa0ff;transition:none}
+#mch{padding:4px 4px;font-size:10px;letter-spacing:.06em}
 </style>
 </head>
 <body>
@@ -181,9 +184,9 @@ header{display:flex;align-items:center;gap:10px;height:60px}
 </div>
 
 <div class="bot">
-  <div class="panel"><div class="phd"><h3>VOICE</h3><span class="ln"></span><div class="tabs" id="tabs"></div></div><div class="voice" id="voice"></div></div>
+  <div class="panel"><div class="phd"><h3>VOICE</h3><span id="kitSel" title="Sound kit: 80s = the sounds of the demo preview, L02 = the original ones"></span><span class="ln"></span><div class="tabs" id="tabs"></div></div><div class="voice" id="voice"></div></div>
   <div class="panel"><div class="phd"><h3>MIXER</h3><span class="ln"></span><span class="cap">LEVEL · PAN</span></div><div class="mixer" id="mixer"></div></div>
-  <div class="panel dark"><div class="phd"><h3>MASTER · FX</h3><span class="ln"></span></div>
+  <div class="panel dark"><div class="phd"><h3>MASTER · FX</h3><span class="ln"></span><i class="mled" id="mled" title="MIDI In"></i><select id="mch" title="MIDI channel the drum machine listens to"></select></div>
     <div class="ctl" id="fxk" style="justify-content:space-between"></div>
     <div class="row" style="margin-top:auto;flex-wrap:nowrap"><span class="cap">EXPORT</span><span id="barsSel"></span><button class="mini" id="xwav">WAV</button><button class="mini" id="xmid">MIDI</button><button class="mini" id="xstem" title="One WAV for each voice">Stems</button></div>
   </div>
@@ -215,17 +218,31 @@ const PRM={
   cb:[['tune','Tune',.6,1.6,1,0,fX],['decay','Decay',60,900,300,1,fMs],['tone','Tone',1200,6000,2600,1,fHz]],
   cy:[['tune','Tune',.6,1.6,1,0,fX],['decay','Decay',300,3500,1400,1,fMs],['tone','Tone',3000,12000,7000,1,fHz],['noise','Wash',0,100,35]]
 };
+/* KIT 80s: i suoni dell'anteprima di "Estate a colori". Stesse ricette (oscillatori, rumori filtrati, curve),
+   con i valori di partenza che le riproducono. Chiavi con la "e" davanti, così convivono con quelle del kit L02. */
+const PRM80={
+  kick:[['eTune','Tune',.5,2,1,0,fX],['eDecay','Decay',60,800,200,1,fMs],['ePunch','Punch',0,100,50,0,fPct],['eClick','Click',0,100,50,0,fPct],['eDrive','Drive',0,100,50,0,fPct]],
+  snare:[['eTune','Tune',120,320,190,1,fHz,'BODY'],['eBdec','Decay',20,200,55,0,fMs,'BODY'],['eSnap','Snares',0,100,50,0,fPct,'SNARES'],['eTone','Tone',400,4000,1200,1,fHz,'SNARES'],['eNdec','Decay',30,400,110,0,fMs,'SNARES']],
+  clap:[['eSpread','Spread',4,25,11,0,fMs],['eDecay','Decay',30,400,100,0,fMs],['eTone','Tone',1500,9000,4000,1,fHz]],
+  ch:[['eDecay','Decay',8,120,25,0,fMs],['eTone','Tone',3000,12000,7000,1,fHz]],
+  oh:[['eDecay','Decay',40,600,110,1,fMs],['eTone','Tone',3000,12000,7000,1,fHz]],
+  lt:[['eTune','Tune',50,200,95,1,fHz],['eDecay','Decay',60,800,200,1,fMs]],
+  ht:[['eTune','Tune',80,320,150,1,fHz],['eDecay','Decay',60,800,200,1,fMs]],
+  rim:[['eDecay','Decay',5,80,15,0,fMs],['eTone','Tone',600,5000,1500,1,fHz]],
+  cb:[['eTune','Tune',.6,1.6,1,0,fX],['eDecay','Decay',20,400,60,1,fMs],['eTone','Tone',1200,6000,3000,1,fHz]],
+  cy:[['eDecay','Decay',200,2500,650,1,fMs],['eTone','Tone',2000,10000,5000,1,fHz]]
+};
 const DLV={kick:96,snare:84,clap:80,ch:70,oh:66,lt:80,ht:76,rim:62,cb:58,cy:56}, DPN={kick:0,snare:0,clap:.1,ch:.25,oh:.25,lt:-.3,ht:.3,rim:-.15,cb:.2,cy:-.2};
-function defVoice(id){ const o={lvl:DLV[id],pan:DPN[id],mute:false,solo:false}; PRM[id].forEach(p=>o[p[0]]=p[4]);
+function defVoice(id){ const o={lvl:DLV[id],pan:DPN[id],mute:false,solo:false}; PRM[id].forEach(p=>o[p[0]]=p[4]); PRM80[id].forEach(p=>o[p[0]]=p[4]);
   if(id==='kick'){ o.shape='Flat'; o.envNodes=[[0,60],[60,55],[220,50]]; } if(id==='snare') o.model='808'; return o; }
 const NO=null;
 const S1=(v=2)=>({v,r:1,p:100,n:0});
 function emptyTr(n){ const t={}; IDS.forEach(id=>t[id]=new Array(n).fill(NO)); return t; }
 const state={
   bpm:120, swing:0, meter:4, gridKey:'1/16', master:80, exportBars:4, preset:'House',
-  fx:{drive:20,comp:30,delayMix:12,delayDiv:'1/8',delayFeedback:25,reverbMix:12,reverbSize:40},
+  fx:{drive:20,comp:30,delayMix:12,delayDiv:'1/8',delayFeedback:25,reverbMix:12,reverbSize:40,gate:50}, kit:'80s',
   v:Object.fromEntries(IDS.map(id=>[id,defVoice(id)])),
-  pats:Array.from({length:8},()=>emptyTr(16)), cur:0, chain:[0], chainOn:false
+  pats:Array.from({length:8},()=>emptyTr(16)), cur:0, chain:[0], chainOn:false, midiCh:0
 };
 const totalSteps=()=>state.meter*SUBDIV[state.gridKey];
 function resizeAll(){ const n=totalSteps(); state.pats.forEach(p=>IDS.forEach(id=>{ const o=p[id]||[], a=new Array(n).fill(NO); for(let i=0;i<n;i++) a[i]=o[i]||NO; p[id]=a; })); }
@@ -270,7 +287,7 @@ let loadedOld=false;
 (function load(){
   try{
     const s=JSON.parse(localStorage.getItem(KEY)||'null');
-    if(s){ ['bpm','swing','meter','gridKey','master','exportBars','preset','cur','chainOn'].forEach(k=>{ if(s[k]!==undefined) state[k]=s[k]; });
+    if(s){ ['bpm','swing','meter','gridKey','master','exportBars','preset','cur','chainOn','midiCh','kit'].forEach(k=>{ if(s[k]!==undefined) state[k]=s[k]; });
       if(s.fx) Object.assign(state.fx,s.fx); if(Array.isArray(s.chain)&&s.chain.length) state.chain=s.chain;
       IDS.forEach(id=>{ if(s.v&&s.v[id]) Object.assign(state.v[id],s.v[id]); });
       if(Array.isArray(s.pats)) s.pats.slice(0,8).forEach((p,i)=>IDS.forEach(id=>{ if(p&&Array.isArray(p[id])) state.pats[i][id]=p[id]; }));
@@ -342,9 +359,56 @@ function createImpulse(ctx,duration,decay){
 const DELAY_DIV={'1/4':1,'1/8':0.5,'1/8T':1/3,'1/16':0.25};
 /* Costruisce la catena FX master (comp -> drive -> [dry + send delay + send reverb] -> destination).
    Riusata sia in tempo reale sia negli export offline. Ritorna i riferimenti ai nodi per aggiornamenti live. */
+/* ===== Compressore del master senza anticipo =====
+   Il DynamicsCompressor del browser ritarda tutto il segnale di 6 ms (guarda avanti per prevedere i picchi)
+   e con l'attacco di 3 ms schiaccia proprio il colpo iniziale: la batteria arrivava dopo gli altri strumenti.
+   Questo fa lo stesso lavoro (stessa soglia, rapporto, ginocchio morbido da 30 dB e guadagno di recupero,
+   come quello del browser) ma a ritardo zero. Se l'AudioWorklet non c'è, si torna a quello del browser. */
+const COMP_SRC=`class S33DmComp extends AudioWorkletProcessor{
+  static get parameterDescriptors(){ return [
+    {name:'threshold',defaultValue:-24,minValue:-100,maxValue:0,automationRate:'k-rate'},
+    {name:'ratio',defaultValue:4,minValue:1,maxValue:20,automationRate:'k-rate'},
+    {name:'attack',defaultValue:.003,minValue:.0001,maxValue:1,automationRate:'k-rate'},
+    {name:'release',defaultValue:.25,minValue:.001,maxValue:2,automationRate:'k-rate'}]; }
+  constructor(){ super(); this.env=0; }
+  static red(db,th,ra){ const kn=30, o=db-th;
+    if(2*o<-kn) return 0;
+    if(2*o<=kn) return (1-1/ra)*(o+kn/2)*(o+kn/2)/(2*kn);
+    return (1-1/ra)*o; }
+  process(ins,outs,P){
+    const i=ins[0], o=outs[0]; if(!i||!i.length){ for(const c of o) c.fill(0); return true; }
+    const th=P.threshold[0], ra=P.ratio[0], aA=Math.exp(-1/(P.attack[0]*sampleRate)), aR=Math.exp(-1/(P.release[0]*sampleRate));
+    const mk=Math.pow(10,0.5*S33DmComp.red(0,th,ra)/20);
+    const n=i[0].length; let env=this.env;
+    for(let k=0;k<n;k++){
+      let x=Math.abs(i[0][k]); if(i[1]) x=Math.max(x,Math.abs(i[1][k]));
+      const t=S33DmComp.red(20*Math.log10(x+1e-9),th,ra);
+      env = t>env ? aA*env+(1-aA)*t : aR*env+(1-aR)*t;
+      const g=Math.pow(10,-env/20)*mk;
+      for(let c=0;c<o.length;c++) o[c][k]=(i[c]||i[0])[k]*g;
+    }
+    this.env=env; return true; } }
+registerProcessor('s33-dm-comp',S33DmComp);`;
+const compReady=new WeakMap();
+function loadComp(ctx){
+  if(!ctx.audioWorklet||typeof AudioWorkletNode==='undefined') return Promise.resolve(false);
+  if(!compReady.has(ctx)){
+    compReady.set(ctx,ctx.audioWorklet.addModule('data:text/javascript;charset=utf-8,'+encodeURIComponent(COMP_SRC)).then(()=>true).catch(()=>false));
+  }
+  return compReady.get(ctx);
+}
+const compOk=new WeakSet();
+function makeComp(ctx){
+  if(compOk.has(ctx)){ try{
+    const n=new AudioWorkletNode(ctx,'s33-dm-comp',{numberOfInputs:1,numberOfOutputs:1,outputChannelCount:[2]});
+    ['threshold','ratio','attack','release'].forEach(k=>{ n[k]=n.parameters.get(k); });
+    return n; }catch(e){} }
+  return ctx.createDynamicsCompressor();
+}
+async function prepComp(ctx){ if(await loadComp(ctx)) compOk.add(ctx); }
 function buildFxChain(ctx,inputNode,fx,bpm,out){
   out=out||ctx.destination;
-  const comp=ctx.createDynamicsCompressor();
+  const comp=makeComp(ctx);
   const amt=fx.comp/100;
   comp.threshold.value=-amt*30;
   comp.ratio.value=1+amt*7;
@@ -370,7 +434,10 @@ function buildFxChain(ctx,inputNode,fx,bpm,out){
   const reverbWet=ctx.createGain();reverbWet.gain.value=fx.reverbMix/100;
   shaper.connect(convolver);convolver.connect(reverbWet);reverbWet.connect(out);
 
-  return {comp,shaper,delayNode,fbGain,delayWet,convolver,reverbWet};
+  const gateIn=ctx.createGain(), gateConv=ctx.createConvolver(); gateConv.normalize=false; gateConv.buffer=gateIR(ctx);
+  const gateG=ctx.createGain(); gateG.gain.value=0; const gateWet=ctx.createGain(); gateWet.gain.value=(fx.gate==null?50:fx.gate)/100*1.6;
+  gateIn.connect(gateConv); gateConv.connect(gateG); gateG.connect(gateWet); gateWet.connect(inputNode);
+  return {comp,shaper,delayNode,fbGain,delayWet,convolver,reverbWet,gateIn,gateG,gateWet,gateEnd:0};
 }
 
 function playKick(ctx,dest,time,p){
@@ -565,8 +632,54 @@ function playCymbal(ctx,dest,time,p){
   ns.connect(nh); nh.connect(ng); ng.connect(dest); ns.start(time); ns.stop(time+d+.2);
 }
 /* un colpo: ritorna l'inviluppo dell'open hat per il choke */
+/* ---- KIT 80s ---- */
+/* volume di ogni voce: quello dell'anteprima, riportato ai livelli del mixer della L02 */
+const PG80={kick:.55,snare:.48,clap:.24,ch:.2,oh:.2,lt:.5,ht:.5,rim:.3,cb:.14,cy:.15}, K80=.6;
+const G80=Object.fromEntries(Object.keys(PG80).map(k=>[k,PG80[k]*127/DLV[k]*K80]));
+const tanhCache=new Map();
+function tanhCurve(k){ k=Math.round(k*100)/100; if(tanhCache.has(k)) return tanhCache.get(k);
+  const n=2048, c=new Float32Array(n); for(let i=0;i<n;i++){ const x=(i/(n-1)*2-1)*2; c[i]=Math.tanh(k*x); } tanhCache.set(k,c); return c; }
+function nz(ctx,t,len){ const s=ctx.createBufferSource(); s.buffer=getNoiseBuffer(ctx,3); s.start(t,Math.random()*1.5); s.stop(t+len); return s; }
+function bq(ctx,type,f,q){ const b=ctx.createBiquadFilter(); b.type=type; b.frequency.value=Math.min(f,ctx.sampleRate*.45); b.Q.value=q==null?.7071:q; return b; }
+function decayEnv(ctx,t,peak,tau){ const g=ctx.createGain(); g.gain.setValueAtTime(peak,t); g.gain.setTargetAtTime(0,t,Math.max(.001,tau)); return g; }
+function play80(id,ctx,out,t,p){
+  const G=ctx.createGain(); G.gain.value=G80[id]; G.connect(out);
+  switch(id){
+    case 'kick':{ const tn=p.eTune, base=48*tn, sw=115*tn*p.ePunch/50, tau=p.eDecay/1000, k=Math.max(.2,1.6*p.eDrive/50);
+      const o=ctx.createOscillator(); o.frequency.setValueAtTime(base+sw,t); o.frequency.setTargetAtTime(base,t,.03);
+      const a=decayEnv(ctx,t,.5,tau), sh=ctx.createWaveShaper(); sh.curve=tanhCurve(k*2); o.connect(a); a.connect(sh); sh.connect(G);
+      const c=decayEnv(ctx,t,.15*p.eClick/50,.004); nz(ctx,t,.05).connect(c); c.connect(sh);
+      o.start(t); o.stop(t+tau*6+.05); return null; }
+    case 'snare':{ const o=ctx.createOscillator(); o.frequency.value=p.eTune; const b=decayEnv(ctx,t,.6,p.eBdec/1000); o.connect(b); b.connect(G); o.start(t); o.stop(t+p.eBdec/1000*7+.02);
+      const h=bq(ctx,'highpass',p.eTone), n=decayEnv(ctx,t,.5*p.eSnap/50,p.eNdec/1000); nz(ctx,t,p.eNdec/1000*7+.02).connect(h); h.connect(n); n.connect(G); return null; }
+    case 'clap':{ const sp=p.eSpread/1000, h=bq(ctx,'highpass',900), l=bq(ctx,'lowpass',p.eTone), e=ctx.createGain(), gg=e.gain; gg.setValueAtTime(0,t);
+      for(let i=0;i<3;i++){ gg.setValueAtTime(1,t+i*sp); gg.setTargetAtTime(0,t+i*sp,.008); }
+      const tt=t+Math.max(.03,2*sp+.008); gg.setValueAtTime(1,tt); gg.setTargetAtTime(0,tt,p.eDecay/1000);
+      nz(ctx,t,tt-t+p.eDecay/1000*7).connect(h); h.connect(l); l.connect(e); e.connect(G); return null; }
+    case 'ch': case 'oh':{ const h1=bq(ctx,'highpass',p.eTone,.5412), h2=bq(ctx,'highpass',p.eTone,1.3066), e=decayEnv(ctx,t,1,p.eDecay/1000);
+      nz(ctx,t,p.eDecay/1000*7+.02).connect(h1); h1.connect(h2); h2.connect(e); e.connect(G); return e; }
+    case 'lt': case 'ht':{ const o=ctx.createOscillator(); o.frequency.setValueAtTime(p.eTune*1.5,t); o.frequency.setTargetAtTime(p.eTune,t,.05);
+      const e=decayEnv(ctx,t,1,p.eDecay/1000); o.connect(e); e.connect(G); o.start(t); o.stop(t+p.eDecay/1000*6+.02); return null; }
+    case 'rim':{ const h=bq(ctx,'highpass',p.eTone), e=decayEnv(ctx,t,1,p.eDecay/1000); nz(ctx,t,p.eDecay/1000*7+.02).connect(h); h.connect(e); e.connect(G); return null; }
+    case 'cb':{ const m=ctx.createGain(); m.gain.value=.5; [540,800].forEach(f=>{ const o=ctx.createOscillator(); o.type='square'; o.frequency.value=f*p.eTune; o.connect(m); o.start(t); o.stop(t+p.eDecay/1000*7+.02); });
+      const h=bq(ctx,'highpass',400), l=bq(ctx,'lowpass',p.eTone), e=decayEnv(ctx,t,1,p.eDecay/1000); m.connect(h); h.connect(l); l.connect(e); e.connect(G); return null; }
+    case 'cy':{ const h=bq(ctx,'highpass',p.eTone), e=decayEnv(ctx,t,1,p.eDecay/1000); nz(ctx,t,Math.min(3,p.eDecay/1000*6)).connect(h); h.connect(e); e.connect(G); return null; }
+  }
+  return null;
+}
+/* ---- riverbero gated (GATE): rullante e clap in un riverbero che si chiude di colpo dopo 260 ms ---- */
+const GATE_LEN=.26;
+function gateIR(ctx){ const sr=ctx.sampleRate, L=Math.floor(sr*2.34), b=ctx.createBuffer(2,L,sr);
+  for(let c=0;c<2;c++){ const d=b.getChannelData(c); let y=0, e=0; const a=Math.exp(-2*Math.PI*6000/sr);
+    for(let i=0;i<L;i++){ y=(1-a)*(Math.random()*2-1)+a*y; d[i]=i<sr*.012?0:y*Math.exp(-i/sr/.455); e+=d[i]*d[i]; }
+    const k=1/Math.sqrt(e); for(let i=0;i<L;i++) d[i]*=k; }
+  return b; }
+function gateHit(fx,t){ if(!fx||!fx.gateG) return; const g=fx.gateG.gain;
+  if(t<(fx.gateEnd||0)) try{ g.cancelScheduledValues(t); }catch(e){}
+  g.setTargetAtTime(1,t,.002); g.setTargetAtTime(0,t+GATE_LEN,.012); fx.gateEnd=t+GATE_LEN; }
 function playVoice(id,ctx,dest,time,vel){
   const p=state.v[id], g=velGain(ctx,dest,vel==null?1:vel);
+  if(state.kit==='80s') return play80(id,ctx,g,time,p);
   switch(id){
     case 'kick': playKick(ctx,g,time,p); break;
     case 'snare': playSnare(ctx,g,time,p); break;
@@ -639,11 +752,12 @@ function barHits(pat,t0,stepDur,fill,rnd){
 async function renderBar(bars,only){
   const n=totalSteps(), sd=60/state.bpm/SUBDIV[state.gridKey], len=bars*n*sd, tail=1.2+state.fx.reverbSize/100*3.2;
   const oc=new OfflineAudioContext(2,Math.ceil(44100*(len+tail)),44100);
-  const mg=oc.createGain(); mg.gain.value=state.master/127; buildFxChain(oc,mg,state.fx,state.bpm);
-  const vg=mkVoiceGains(oc,mg); let lastOH=null;
+  await prepComp(oc);
+  const mg=oc.createGain(); mg.gain.value=state.master/127; const fxo=buildFxChain(oc,mg,state.fx,state.bpm);
+  const vg=mkVoiceGains(oc,mg,null,fxo.gateIn); let lastOH=null;
   for(let b=0;b<bars;b++) barHits(P(),b*n*sd,sd,false).forEach(([id,t,vel])=>{ if(only?id!==only:!isAudible(id)) return;
     if(id==='ch'&&lastOH){ lastOH.gain.cancelScheduledValues(t); lastOH.gain.setTargetAtTime(0,t,.004); }
-    const r=playVoice(id,oc,vg[id],t,vel); if(id==='oh') lastOH=r; });
+    const r=playVoice(id,oc,vg[id],t,vel); if(id==='oh') lastOH=r; if(id==='snare'||id==='clap') gateHit(fxo,t); });
   return oc.startRendering();
 }
 async function exportLoopWav(bars){ downloadBlob(audioBufferToWav(await renderBar(bars)),'s33-drum-'+'ABCDEFGH'[state.cur]+'-'+bars+'bar.wav'); }
@@ -662,7 +776,7 @@ function exportMidi(bars){
 
 /* =================== Audio =================== */
 let audioCtx=null, masterGain=null, vGain={}, fxNodes=null, postGain=null, initP=null, anV={};
-function mkVoiceGains(ctx,dest,an){ const o={}; IDS.forEach(id=>{ const g=ctx.createGain(); g.gain.value=state.v[id].lvl/127; const p=ctx.createStereoPanner(); p.pan.value=state.v[id].pan; g.connect(p); p.connect(dest);
+function mkVoiceGains(ctx,dest,an,gateIn){ const o={}; IDS.forEach(id=>{ const g=ctx.createGain(); g.gain.value=state.v[id].lvl/127; const p=ctx.createStereoPanner(); p.pan.value=state.v[id].pan; g.connect(p); p.connect(dest); if(gateIn&&(id==='snare'||id==='clap')) p.connect(gateIn);
   if(an){ const a=ctx.createAnalyser(); a.fftSize=256; g.connect(a); an[id]=a; } o[id]=Object.assign(g,{pn:p}); }); return o; }
 function initAudio(){
   if(initP) return initP;
@@ -671,10 +785,11 @@ function initAudio(){
     if(HOST){ HOST.started=true; audioCtx=await HOST.getCtx(); out=HOST.out; }
     else { audioCtx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'}); out=audioCtx.destination; }
     if(audioCtx.state==='suspended') try{ await audioCtx.resume(); }catch(e){}
+    await prepComp(audioCtx);
     postGain=audioCtx.createGain(); postGain.connect(out);
     masterGain=audioCtx.createGain(); masterGain.gain.value=state.master/127;
     fxNodes=buildFxChain(audioCtx,masterGain,state.fx,curBpm(),postGain);
-    vGain=mkVoiceGains(audioCtx,masterGain,anV);
+    vGain=mkVoiceGains(audioCtx,masterGain,anV,fxNodes.gateIn);
     const b=$('go'); b.textContent='Audio on'; b.classList.add('on');
     setSt('Ready · '+(HOST?'S33 Board':Math.round(audioCtx.sampleRate/100)/10+' kHz')+(loadedOld?' · L01 pattern loaded into A':''));
     return audioCtx;
@@ -686,7 +801,7 @@ function isAudible(id){ const any=IDS.some(k=>state.v[k].solo); return any?state
 let lastOH=null;
 function trig(id,time,vel,v){
   if(id==='ch'&&lastOH){ try{ lastOH.gain.cancelScheduledValues(time); lastOH.gain.setTargetAtTime(0,time,.004); }catch(e){} lastOH=null; }
-  const r=playVoice(id,audioCtx,vGain[id],time,vel); if(id==='oh') lastOH=r;
+  const r=playVoice(id,audioCtx,vGain[id],time,vel); if(id==='oh') lastOH=r; if(id==='snare'||id==='clap') gateHit(fxNodes,time);
   if(HOST&&HOST.midiEmit){ const n=VN[id].gm, k=Math.max(1,Math.min(127,Math.round(MVEL[v||2]*(vel/VEL[v||2]||1)))); HOST.midiEmit([0x99,n,k],time); HOST.midiEmit([0x89,n,0],time+.06); }
   setTimeout(()=>flashVoice(id),Math.max(0,(time-audioCtx.currentTime)*1000));
 }
@@ -754,6 +869,51 @@ if(HOST){
   HOST.onTransport=run=>{ run?startPlayback():stopPlayback(); };
   HOST.onClock=()=>{ showTempo(); updDelay(); };
   HOST.dmView=()=>({pos:curPh,run:isPlaying,pat:P(),n:totalSteps()});
+}
+
+/* =================== MIDI In: le note General MIDI suonano le dieci voci ===================
+   Da sola ascolta tutte le porte MIDI del Mac; nella Mother Board solo il cavo che arriva alla sua presa MIDI.
+   La velocity dà la forza del colpo; mute e solo valgono anche qui. I colpi presi dal MIDI non escono
+   dalla presa MIDI Out (niente anelli). */
+const GM_IN={35:'kick',36:'kick',37:'rim',38:'snare',40:'snare',39:'clap',42:'ch',44:'ch',46:'oh',
+  41:'lt',43:'lt',45:'lt',47:'ht',48:'ht',50:'ht',56:'cb',49:'cy',51:'cy',52:'cy',55:'cy',57:'cy',59:'cy'};
+let midiNames=[], mledT=0;
+function midiLed(){ const l=$('mled'); if(!l) return; l.classList.add('on'); clearTimeout(mledT); mledT=setTimeout(()=>l.classList.remove('on'),90); }
+function midiHit(id,k){
+  if(!audioCtx||!isAudible(id)) return;
+  const t=audioCtx.currentTime, g=Math.pow(Math.max(1,k)/127,1.2);
+  if(id==='ch'&&lastOH){ try{ lastOH.gain.cancelScheduledValues(t); lastOH.gain.setTargetAtTime(0,t,.004); }catch(e){} lastOH=null; }
+  const r=playVoice(id,audioCtx,vGain[id],t,g); if(id==='oh') lastOH=r; if(id==='snare'||id==='clap') gateHit(fxNodes,t);
+  flashVoice(id);
+}
+function onMidiIn(e){
+  const d=e.data; if(!d||d.length<2||d[0]>=0xF0) return;
+  const st=d[0]&0xF0, ch=(d[0]&15)+1;
+  if(state.midiCh&&ch!==state.midiCh) return;
+  if(st===0x90&&d[2]>0){
+    const id=GM_IN[d[1]]; if(!id) return;
+    midiLed();
+    if(audioCtx) midiHit(id,d[2]); else initAudio().then(()=>midiHit(id,d[2])).catch(()=>{});
+  } else if(st===0xB0&&(d[1]===120||d[1]===123)&&lastOH){
+    try{ lastOH.gain.cancelScheduledValues(audioCtx.currentTime); lastOH.gain.setTargetAtTime(0,audioCtx.currentTime,.01); }catch(e){} lastOH=null;
+  }
+}
+function showMidi(){ const s=$('mch'); if(!s) return;
+  s.title=HOST?'MIDI channel · notes arrive from the cable on the MIDI socket':midiNames===null?'MIDI not available in this browser':
+    midiNames.length?'MIDI channel · listening to: '+midiNames.join(', '):'MIDI channel · no MIDI device connected'; }
+async function initMidiIn(){
+  const s=$('mch');
+  s.innerHTML='<option value="0">MIDI · ALL</option>'+Array.from({length:16},(_,i)=>`<option value="${i+1}">MIDI · CH ${i+1}</option>`).join('');
+  s.value=String(state.midiCh|0);
+  s.onchange=()=>{ state.midiCh=+s.value; save(); s.blur(); };
+  // nella board vecchia senza presa MIDI la Drum Machine non ascolta il MIDI del Mac per conto suo (note doppie)
+  if(HOST&&!HOST.midiAccess){ s.disabled=true; s.title='No MIDI socket in this board'; return; }
+  if(!navigator.requestMIDIAccess){ midiNames=null; showMidi(); return; }
+  try{
+    const acc=await navigator.requestMIDIAccess();
+    const hook=()=>{ midiNames=[]; acc.inputs.forEach(i=>{ i.onmidimessage=onMidiIn; midiNames.push(i.name); }); showMidi(); };
+    hook(); acc.onstatechange=hook;
+  }catch(e){ midiNames=null; showMidi(); }
 }
 
 /* =================== Interfaccia: componenti =================== */
@@ -964,6 +1124,15 @@ function buildVoice(){
   const kn=(c,p)=>{ const [k,l,mn,mx,df,lg,fm]=p; knob(c,{label:l,min:mn,max:mx,def:df,log:!!lg,step:mx-mn<=3?.01:mx-mn>2000?10:1,fmt:fm||undefined,get:()=>state.v[id][k],set:x=>{ state.v[id][k]=x; }}); };
   const lvl=c=>knob(c,{label:'Level',min:0,max:127,def:DLV[id],get:()=>state.v[id].lvl,set:x=>{ state.v[id].lvl=x; },onChange:x=>{ if(vGain[id]) vGain[id].gain.setTargetAtTime(x/127,audioCtx.currentTime,.01); drawMix(); }});
   const head=s=>{ const t=s.querySelector('.tag'); const p=el('button','', '▶'); p.title='Play'; p.onclick=()=>hit(id); t.appendChild(p); const w=el('button','','WAV'); w.title='Export this sound as WAV'; w.onclick=()=>exportOne(id); t.appendChild(w); };
+  const ks=$('kitSel'); ks.innerHTML=''; sel(ks,{label:'',opts:[['80s','KIT 80s'],['L02','KIT L02']],get:()=>state.kit,set:x=>{ state.kit=x; save(); buildVoice(); hit(selV); }});
+  if(state.kit==='80s'){
+    const g80={}; PRM80[id].forEach(p=>{ const g=p[7]||'SOUND'; (g80[g]=g80[g]||[]).push(p); });
+    Object.keys(g80).forEach((g,i)=>{ const [s,c]=sec(g); if(i===0) head(s); g80[g].forEach(p=>kn(c,p)); });
+    const [sm,cm]=sec('MIX'); lvl(cm);
+    if(id==='snare'||id==='clap'){ const t=el('div','');t.style.cssText='font:500 10.5px/1.4 -apple-system,sans-serif;color:rgba(255,255,255,.85);max-width:170px;margin-top:4px'; t.textContent='Gated reverb: GATE in MASTER · FX.'; sm.appendChild(t); }
+    if(id==='ch'||id==='oh'){ const t=el('div','');t.style.cssText='font:500 10.5px/1.4 -apple-system,sans-serif;color:rgba(255,255,255,.85);max-width:170px;margin-top:4px'; t.textContent='The closed hat cuts the open hat (choke), as on the classic machines.'; sm.appendChild(t); }
+    return;
+  }
   if(id==='kick'){
     const [s0]=sec('PITCH ENVELOPE'); s0.style.flex='none'; head(s0);
     sel(s0,{label:'',opts:['Punch','Deep','Hard','Flat'].map(x=>[x,x.toUpperCase()]),get:()=>v.shape,set:x=>{ v.shape=x; applyKickShape(x); drawEnv(); }});
@@ -977,7 +1146,7 @@ function buildVoice(){
   if(id==='snare') sel(sm,{label:'Model',opts:[['808','808'],['909','909'],['Tight','TIGHT']],get:()=>v.model,set:x=>{ v.model=x; hit(id); }});
   if(id==='ch'||id==='oh'){ const t=el('div','','');t.style.cssText='font:500 10.5px/1.4 -apple-system,sans-serif;color:rgba(255,255,255,.85);max-width:170px;margin-top:4px'; t.textContent='The closed hat cuts the open hat (choke), as on the classic machines.'; sm.appendChild(t); }
 }
-async function exportOne(id){ const oc=new OfflineAudioContext(2,Math.ceil(44100*Math.max(1.2,(state.v[id].decay||300)/1000+.6)),44100); const g=oc.createGain(); g.connect(oc.destination); playVoice(id,oc,g,0,1); downloadBlob(audioBufferToWav(await oc.startRendering()),'s33-'+id+'.wav'); }
+async function exportOne(id){ const oc=new OfflineAudioContext(2,Math.ceil(44100*Math.max(1.2,(state.kit==='80s'?state.v[id].eDecay*6:state.v[id].decay||300)/1000+.6)),44100); const g=oc.createGain(); g.connect(oc.destination); playVoice(id,oc,g,0,1); downloadBlob(audioBufferToWav(await oc.startRendering()),'s33-'+id+'.wav'); }
 
 /* =================== master, effetti, export =================== */
 let impT=0;
@@ -987,6 +1156,7 @@ function buildFx(){
   knob(c,{label:'Comp',min:0,max:100,def:DEFAULTS.fx.comp,...b('comp'),fmt:fPct,onChange:v=>{ if(fxNodes){ fxNodes.comp.threshold.value=-(v/100)*30; fxNodes.comp.ratio.value=1+(v/100)*7; } }});
   knob(c,{label:'Volume',min:0,max:127,def:DEFAULTS.master,get:()=>state.master,set:v=>{ state.master=v; },onChange:v=>{ if(masterGain) masterGain.gain.setTargetAtTime(v/127,audioCtx.currentTime,.01); }});
   knob(c,{label:'Reverb',min:0,max:100,def:DEFAULTS.fx.reverbMix,...b('reverbMix'),fmt:fPct,onChange:v=>{ if(fxNodes) fxNodes.reverbWet.gain.value=v/100; }});
+  knob(c,{label:'Gate',min:0,max:100,def:DEFAULTS.fx.gate,...b('gate'),fmt:fPct,onChange:v=>{ if(fxNodes) fxNodes.gateWet.gain.setTargetAtTime(v/100*1.6,audioCtx.currentTime,.01); }});
   knob(c,{label:'Size',min:0,max:100,def:DEFAULTS.fx.reverbSize,...b('reverbSize'),fmt:fPct,onChange:v=>{ clearTimeout(impT); impT=setTimeout(()=>{ if(fxNodes) fxNodes.convolver.buffer=createImpulse(audioCtx,.3+v/100*3.2,2.0); },150); }});
   knob(c,{label:'Delay',min:0,max:100,def:DEFAULTS.fx.delayMix,...b('delayMix'),fmt:fPct,onChange:v=>{ if(fxNodes) fxNodes.delayWet.gain.value=v/100; }});
   knob(c,{label:'Feedback',min:0,max:90,def:DEFAULTS.fx.delayFeedback,...b('delayFeedback'),fmt:fPct,onChange:v=>{ if(fxNodes) fxNodes.fbGain.gain.value=(v/100)*.85; }});
@@ -1015,6 +1185,7 @@ addEventListener('resize',()=>{ fit(); if(selV==='kick') drawEnv(); });
 document.body.insertAdjacentHTML('afterbegin','<svg width="0" height="0" style="position:absolute"><defs><radialGradient id="kg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#4a4743"/><stop offset="1" stop-color="#1a1917"/></radialGradient></defs></svg>');
 buildSel(); drawTools(); buildGrid(); buildMixer(); buildFx(); buildVoice(); showTempo(); showPlay(); fit(); requestAnimationFrame(meters);
 setInterval(()=>{ if(HOST) showTempo(); },500);
+initMidiIn();
 if(!HOST&&'serviceWorker' in navigator&&/^https?:$/.test(location.protocol)) addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}); });
 </script>
 </body>
